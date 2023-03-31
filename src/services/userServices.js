@@ -1,4 +1,4 @@
-import axios  from "axios"
+import axios from "../axios";
 
 const handleLoginApi = (email,password) => {
     return axios.post('/api/login', {
@@ -6,10 +6,14 @@ const handleLoginApi = (email,password) => {
         password: password
     });
 }
-
+const getAllUsers = (inputId) => {
+    return axios.get(`/api/getAllUsers?id=${inputId}`,{
+        id : inputId
+    })
+}
 // const check = () => {
 //     return axios.get('/check')
 // }
 
 
-export {handleLoginApi}
+export {handleLoginApi , getAllUsers}

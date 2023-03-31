@@ -5,7 +5,8 @@ import * as actions from "../../store/actions";
 import './login.scss';
 import { FormattedMessage } from 'react-intl';
 
-import { check, handleLoginApi} from '../../services/userServices';
+import {  handleLoginApi} from '../../services/userServices';
+import { userLoginSuccess } from '../../store/actions';
 
 class Login extends Component {
     constructor(props) {
@@ -14,6 +15,7 @@ class Login extends Component {
             username: "",
             password : '',
             isShowPassword : false,
+            errorMessage: '',
         }
     }
 
@@ -34,12 +36,33 @@ class Login extends Component {
     handleLogin = async (event) => {
        console.log('username : '+ this.state.username)
        console.log('password: '+ this.state.password)
+       this.setState({
+            errorMessage : '',
+       })
        try {
-        let message = await handleLoginApi(this.state.username, this.state.password);
+        let data = await handleLoginApi(this.state.username, this.state.password);
+            if (data && data.errCode !== 0)
+            {
+                this.setState({
+                    errorMessage : data.message
+                })
+            }
+
+            if (data && data.errCode === 0) {
+                this.props.userLoginSuccess(data.user)
+                console.log(' login is success')
+            }
         // let message = await check()
-        console.log('check message ', message)
+        console.log(data);
        } catch (error) {
-        console.log(error)
+        if (error.response ) {
+            if (error.response.data)    
+            {
+                this.setState({
+                    errorMessage : error.response.data.message
+                })
+            }
+        }
        }
 
      
@@ -96,7 +119,10 @@ class Login extends Component {
 
                     </div>
                     
+                <div className='col-12' style={{color: 'red'}}>
+                    {this.state.errorMessage}
 
+                </div>
 
                 </div>
                 <div className='col-12 form-group btn'>
@@ -136,9 +162,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         navigate: (path) => dispatch(push(path)),
-        adminLoginSuccess: (adminInfo) => dispatch(actions.adminLoginSuccess(adminInfo)),
-        adminLoginFail: () => dispatch(actions.adminLoginFail()),
-    };
+        // userLoginFail: () => dispatch(actions.adminLoginFail()),
+        userLoginSuccess : (userInfor) => dispatch(actions.userLoginSuccess(userInfor))
+     };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
